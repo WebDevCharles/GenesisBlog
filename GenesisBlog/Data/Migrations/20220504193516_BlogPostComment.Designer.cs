@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GenesisBlog.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220504170835_BlogPostControllerUpdated")]
-    partial class BlogPostControllerUpdated
+    [Migration("20220504193516_BlogPostComment")]
+    partial class BlogPostComment
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -54,6 +54,28 @@ namespace GenesisBlog.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("BlogPosts");
+                });
+
+            modelBuilder.Entity("GenesisBlog.Models.BlogPostComment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BlogPostId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogPostId");
+
+                    b.ToTable("BlogPostComment");
                 });
 
             modelBuilder.Entity("GenesisBlog.Models.BlogUser", b =>
@@ -266,6 +288,17 @@ namespace GenesisBlog.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("GenesisBlog.Models.BlogPostComment", b =>
+                {
+                    b.HasOne("GenesisBlog.Models.BlogPost", "BlogPost")
+                        .WithMany("BlogPostComments")
+                        .HasForeignKey("BlogPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BlogPost");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -315,6 +348,11 @@ namespace GenesisBlog.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("GenesisBlog.Models.BlogPost", b =>
+                {
+                    b.Navigation("BlogPostComments");
                 });
 #pragma warning restore 612, 618
         }

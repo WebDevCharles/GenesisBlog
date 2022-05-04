@@ -20,5 +20,9 @@ namespace GenesisBlog.Models
         public DateTime Created { get; set; } = DateTime.UtcNow;
         public DateTime? Updated { get; set; }
 
+
+        // Naigational Properties
+        public virtual ICollection<BlogPostComment> BlogPostComments { get; set; } = new HashSet<BlogPostComment>();
+
     }
 }

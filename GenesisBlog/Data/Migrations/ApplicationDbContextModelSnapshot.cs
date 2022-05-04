@@ -54,6 +54,28 @@ namespace GenesisBlog.Data.Migrations
                     b.ToTable("BlogPosts");
                 });
 
+            modelBuilder.Entity("GenesisBlog.Models.BlogPostComment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BlogPostId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogPostId");
+
+                    b.ToTable("BlogPostComment");
+                });
+
             modelBuilder.Entity("GenesisBlog.Models.BlogUser", b =>
                 {
                     b.Property<string>("Id")
@@ -264,6 +286,17 @@ namespace GenesisBlog.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("GenesisBlog.Models.BlogPostComment", b =>
+                {
+                    b.HasOne("GenesisBlog.Models.BlogPost", "BlogPost")
+                        .WithMany("BlogPostComments")
+                        .HasForeignKey("BlogPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BlogPost");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -313,6 +346,11 @@ namespace GenesisBlog.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("GenesisBlog.Models.BlogPost", b =>
+                {
+                    b.Navigation("BlogPostComments");
                 });
 #pragma warning restore 612, 618
         }
