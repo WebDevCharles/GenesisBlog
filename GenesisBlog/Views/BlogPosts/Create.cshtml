@@ -25,6 +25,7 @@
             <div class="form-group">
                 <label asp-for="Content" class="control-label"></label>
                 <div id="quillEditor"></div>
+                <span asp-validation-for="Content" class="text-danger"></span>
                 <input type="hidden" asp-for="Content"/>
             </div>
             <div class="form-group">

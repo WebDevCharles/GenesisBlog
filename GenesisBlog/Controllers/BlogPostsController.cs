@@ -9,10 +9,12 @@ namespace GenesisBlog.Controllers
     public class BlogPostsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public BlogPostsController(ApplicationDbContext context)
+        public BlogPostsController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // GET: BlogPosts
@@ -53,11 +55,31 @@ namespace GenesisBlog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Title,Abstract,Content")] BlogPost blogPost)
         {
+            // Check with the Model annotations to see if anything has been violated.
             if (ModelState.IsValid)
             {
+                // When using the quill rich text editor, content will never be an empty string because
+                // quill auto inserts <p><br></p>; it will replace the <br> tag with whatever is 
+                // entered by the user; so this is a check for a blank field entered by the user.
+                var invalidContent = _configuration["DefaultSettings:QuillContent"];
+                if (blogPost.Content == invalidContent)
+                {
+                    // The following line is for displaying error in the validation summary
+                    // (An additional error at the top of the screen)
+                    ModelState.AddModelError("", "Error has been detected");
+
+                    // Error message displayed because nothing was entered in the Content field.
+                    ModelState.AddModelError("Content", "Whoa! Back up! Please enter something in Content!");
+                    return View(blogPost);
+                }
+                else if (blogPost.Content == "<p>.</p>")
+                {
+                    ModelState.AddModelError("", "Error has been detected");
+                    ModelState.AddModelError("Content", "Seriously? You need to give me something more than that...");
+                    return View(blogPost);
+                }
 
                 blogPost.Created = DateTime.UtcNow;
-
                 _context.Add(blogPost);
                 await _context.SaveChangesAsync();
 
