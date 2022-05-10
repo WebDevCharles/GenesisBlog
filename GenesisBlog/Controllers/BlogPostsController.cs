@@ -1,31 +1,39 @@
 ﻿#nullable disable
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using GenesisBlog.Data;
 using GenesisBlog.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using GenesisBlog.Services.Interfaces;
 
 namespace GenesisBlog.Controllers
 {
     public class BlogPostsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly IConfiguration _configuration;
+        private readonly IImageService _imageService;
 
-        public BlogPostsController(ApplicationDbContext context, IConfiguration configuration)
+        public BlogPostsController(ApplicationDbContext context, IImageService imageService)
         {
             _context = context;
-            _configuration = configuration;
+            _imageService = imageService;
         }
 
         // GET: BlogPosts
         public async Task<IActionResult> Index()
         {
-            return View(await _context.BlogPosts.ToListAsync());
+            //var posts = await _context.BlogPost.ToListAsync();
+            var posts = await _context.BlogPosts
+                                                  .Include(b => b.Tags)
+                                                  .ToListAsync();
+
+            return View(posts);
         }
 
         // GET: BlogPosts/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+
             if (id == null)
             {
                 return NotFound();
@@ -42,9 +50,13 @@ namespace GenesisBlog.Controllers
         }
 
         // GET: BlogPosts/Create
-        [HttpGet]
         public IActionResult Create()
         {
+            //1: What data does the select list contain
+            //2. The property that gets transmitted to HttpPost
+            //3. The property that gets shown to the user
+            ViewData["TagIds"] = new MultiSelectList(_context.Tag, "Id", "Text");
+
             return View();
         }
 
@@ -53,36 +65,26 @@ namespace GenesisBlog.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Abstract,Content")] BlogPost blogPost)
+        public async Task<IActionResult> Create([Bind("Id,Title,Abstract,Content,Created,Updated,Slug,IsDeleted,BlogPostState")] BlogPost blogPost, IFormFile theImage, List<int> tagIds)
         {
-            // Check with the Model annotations to see if anything has been violated.
             if (ModelState.IsValid)
             {
-                // When using the quill rich text editor, content will never be an empty string because
-                // quill auto inserts <p><br></p>; it will replace the <br> tag with whatever is 
-                // entered by the user; so this is a check for a blank field entered by the user.
-                var invalidContent = _configuration["DefaultSettings:QuillContent"];
-                if (blogPost.Content == invalidContent)
+                //Before I try interacting with the IFormFile
+                //I should make sure it's present
+                if (theImage is not null)
                 {
-                    // The following line is for displaying error in the validation summary
-                    // (An additional error at the top of the screen)
-                    ModelState.AddModelError("", "Error has been detected");
-
-                    // Error message displayed because nothing was entered in the Content field.
-                    ModelState.AddModelError("Content", "Whoa! Back up! Please enter something in Content!");
-                    return View(blogPost);
-                }
-                else if (blogPost.Content == "<p>.</p>")
-                {
-                    ModelState.AddModelError("", "Error has been detected");
-                    ModelState.AddModelError("Content", "Seriously? You need to give me something more than that...");
-                    return View(blogPost);
+                    blogPost.ImageData = await _imageService.ConvertFileToByteArrayAsync(theImage);
+                    blogPost.ImageType = theImage.ContentType;
                 }
 
-                blogPost.Created = DateTime.UtcNow;
+                //Associate any/all selected tags with the BlogPost
+                foreach (var tagId in tagIds)
+                {
+                    blogPost.Tags.Add(await _context.Tag.FindAsync(tagId));
+                }
+
                 _context.Add(blogPost);
                 await _context.SaveChangesAsync();
-
                 return RedirectToAction(nameof(Index));
             }
             return View(blogPost);
@@ -96,11 +98,19 @@ namespace GenesisBlog.Controllers
                 return NotFound();
             }
 
-            var blogPost = await _context.BlogPosts.FindAsync(id);
+            var blogPost = await _context.BlogPosts
+                                                      .Include(b => b.Tags)
+                                                      .FirstOrDefaultAsync(b => b.Id == id);
+
             if (blogPost == null)
             {
                 return NotFound();
             }
+
+            //4th parameter in a multiSelect list is a List<int> representing the current selection
+            var tagPks = blogPost.Tags.Select(b => b.Id).ToList();
+            ViewData["TagIds"] = new MultiSelectList(_context.Tag, "Id", "Text", tagPks);
+
             return View(blogPost);
         }
 
@@ -109,7 +119,7 @@ namespace GenesisBlog.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Abstract,Content,Created")] BlogPost blogPost)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Abstract,Content,BlogPostState")] BlogPost blogPost, IFormFile file, List<int> tagIds)
         {
             if (id != blogPost.Id)
             {
@@ -120,10 +130,31 @@ namespace GenesisBlog.Controllers
             {
                 try
                 {
-                    blogPost.Created = DateTime.SpecifyKind(blogPost.Created, DateTimeKind.Utc);
-                    blogPost.Updated = DateTime.UtcNow;
+                    //This code gets whats known as a "Tracked entity". By default, most LINQ
+                    //statement that pull data from a DB are tracked. In fact, if you don't it tracked
+                    //you have to use extra code to tell it so.. AsNoTracking()
+                    var existingPost = await _context.BlogPosts
+                                                            .Include(b => b.Tags)
+                                                            .FirstOrDefaultAsync(b => b.Id == blogPost.Id);
 
-                    _context.Update(blogPost);
+                    existingPost.Tags.Clear();
+                    await _context.SaveChangesAsync();
+
+                    //Continue on making the requested user changes
+                    //Since I already have a tracked entity named existingPost I will
+                    //copy over the incoming form values
+                    existingPost.Updated = DateTime.UtcNow;
+                    existingPost.Title = blogPost.Title;
+                    existingPost.Abstract = blogPost.Abstract;
+                    existingPost.Content = blogPost.Content;
+                    existingPost.BlogPostState = blogPost.BlogPostState;
+
+                    //Add all the selected tags back
+                    foreach (var tagId in tagIds)
+                    {
+                        existingPost.Tags.Add(await _context.Tag.FindAsync(tagId));
+                    }
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -139,6 +170,8 @@ namespace GenesisBlog.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewData["TagIds"] = new MultiSelectList(_context.Tag, "Id", "Text", tagIds);
             return View(blogPost);
         }
 

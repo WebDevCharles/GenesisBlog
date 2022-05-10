@@ -1,4 +1,7 @@
 ﻿@model GenesisBlog.Models.BlogPost
+@using GenesisBlog.Models.Enums
+@using GenesisBlog.Services.Interfaces
+@inject IImageService ImageService
 
 @{
     ViewData["Title"] = "Edit";
@@ -6,32 +9,59 @@
 
 <h1>Edit</h1>
 
-<h4>BlogPost</h4>
+<h4>Blog Post</h4>
 <hr />
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Created" />
+            <input type="hidden" asp-for="ImageType" />
+            <input type="hidden" asp-for="ImageData" />
 
-            <input type="hidden" asp-for="Id"/>
-            <input type="hidden" asp-for="Created"/>
-
-            <div class="form-group">
+            <div class="form-group mb-2">
                 <label asp-for="Title" class="control-label"></label>
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-2">
+                <label asp-for="Tags" class="control-label"></label>
+                <select name="TagIds" class="form-control" asp-items="ViewBag.TagIds" multiple></select>
+            </div>
+            <div class="form-group mb-2">
                 <label asp-for="Abstract" class="control-label"></label>
-                <textarea asp-for="Abstract" class="form-control" rows=10></textarea>
+                <input asp-for="Abstract" class="form-control" />
                 <span asp-validation-for="Abstract" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-2">
                 <label asp-for="Content" class="control-label"></label>
-                <div id="quillEditor"></div>
-                <input type="hidden" asp-for="Content"/>
+                <div id="quillEditor">@Html.Raw(Model.Content)</div>
+                <span asp-validation-for="Content" class="text-danger"></span>
+                <input type="hidden" asp-for="Content" />
             </div>
-            <div class="form-group">
+            <div class="form-group mb-2">
+                <label asp-for="BlogPostState" class="control-label"></label>
+                <select asp-for="BlogPostState" asp-items="@Html.GetEnumSelectList<BlogPostState>()" class="form-control"></select>
+                <span asp-validation-for="BlogPostState" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-2">
+                <label asp-for="ImageFile" class="control-label"></label>
+                <input asp-for="ImageFile" class="form-control" accept=".png,.jpg,.jpeg,.gif"
+                       onchange="document.getElementById('blogImage').src = window.URL.createObjectURL(this.files[0])" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-5">
+                @if (Model.ImageData != null)
+                {
+                    <img id="blogImage" src="@ImageService.ConvertByteArrayToFile(Model.ImageData, Model.ImageType)" class="img-fluid img-thumbnail w-25 mt-3">
+                }
+                else
+                {
+                    <img id="blogImage" class="img-fluid img-thumbnail mt-2" style="width:120px;height:120px" src="https://cdn.icon-icons.com/icons2/233/PNG/512/Contacts_26253.png">
+                }
+            </div>
+            <div class="form-group mb-2">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
@@ -43,5 +73,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
 }

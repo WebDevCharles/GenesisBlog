@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GenesisBlog.Models.Enums;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GenesisBlog.Models
 {
@@ -21,9 +23,35 @@ namespace GenesisBlog.Models
         public DateTime Created { get; set; } = DateTime.UtcNow;
         public DateTime? Updated { get; set; }
 
+        // This property is derived from the Title.
+        // This will eventually be used in some cases INSTEAD of
+        // the Primary Key (Id)
+        public string Slug { get; set; } = "";
+
+        public bool IsDeleted { get; set; }
+
+
+        [Display(Name = "Blog Post State")]
+        public BlogPostState BlogPostState { get; set; }
+
+
+        // What if I wanted to record an image with a blog post
+        [Display(Name = "Image")]
+        public byte[] ImageData { get; set; } = Array.Empty<byte>();
+
+
+        [Display(Name = "Image Type")]
+        public string ImageType { get; set; } = String.Empty;
+
+
+        [NotMapped]
+        [Display(Name = "Image File")]
+        public IFormFile? ImageFile { get; set; }
+
 
         // Naigational Properties
         public virtual ICollection<BlogPostComment> BlogPostComments { get; set; } = new HashSet<BlogPostComment>();
+        public virtual ICollection<Tag> Tags { get; set; } = new HashSet<Tag>();
 
     }
 }
