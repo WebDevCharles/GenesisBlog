@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using GenesisBlog.Data;
 using GenesisBlog.Models;
 using GenesisBlog.Services.Interfaces;
+using GenesisBlog.Utilities;
 
 namespace GenesisBlog.Controllers
 {
@@ -65,16 +66,31 @@ namespace GenesisBlog.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Abstract,Content,Created,Updated,Slug,IsDeleted,BlogPostState")] BlogPost blogPost, IFormFile theImage, List<int> tagIds)
+        public async Task<IActionResult> Create([Bind("Title,Abstract,Content,ImageFile,ImageType,ImageData,BlogPostState")] BlogPost blogPost, IFormFile myImage, List<int> tagIds)
         {
             if (ModelState.IsValid)
             {
+                //Create a variable named slug and use the new SlugService....
+                SlugService slugSvc = new();
+                var slug = slugSvc.URLFriendly(blogPost.Title);
+
+                if (_context.BlogPosts.Any(b => b.Slug == slug))
+                {
+                    ModelState.AddModelError("Title", "The Title must be changed, because it has already been used.");
+                    ViewData["TagIds"] = new MultiSelectList(_context.Tag, "Id", "Text", tagIds);
+                    return View(blogPost);
+                }
+                else
+                {
+                    blogPost.Slug = slug;
+                }
+
                 //Before I try interacting with the IFormFile
                 //I should make sure it's present
-                if (theImage is not null)
+                if (myImage is not null)
                 {
-                    blogPost.ImageData = await _imageService.ConvertFileToByteArrayAsync(theImage);
-                    blogPost.ImageType = theImage.ContentType;
+                    blogPost.ImageData = await _imageService.ConvertFileToByteArrayAsync(myImage);
+                    blogPost.ImageType = myImage.ContentType;
                 }
 
                 //Associate any/all selected tags with the BlogPost
@@ -137,12 +153,25 @@ namespace GenesisBlog.Controllers
                                                             .Include(b => b.Tags)
                                                             .FirstOrDefaultAsync(b => b.Id == blogPost.Id);
 
+                    SlugService slugSvc = new();
+                    var newSlug = slugSvc.URLFriendly(blogPost.Title);
+                    if (newSlug != existingPost.Slug)
+                    {
+                        if (_context.BlogPosts.Any(b => b.Slug == newSlug))
+                    {
+                            ModelState.AddModelError("Title", "The Title must be changed, because it has already been used.");
+                            ViewData["TagIds"] = new MultiSelectList(_context.Tag, "Id", "Text", tagIds);
+                            return View(blogPost);
+                        }
+                    }
+
                     existingPost.Tags.Clear();
                     await _context.SaveChangesAsync();
 
                     //Continue on making the requested user changes
                     //Since I already have a tracked entity named existingPost I will
                     //copy over the incoming form values
+                    existingPost.Slug = newSlug;
                     existingPost.Updated = DateTime.UtcNow;
                     existingPost.Title = blogPost.Title;
                     existingPost.Abstract = blogPost.Abstract;

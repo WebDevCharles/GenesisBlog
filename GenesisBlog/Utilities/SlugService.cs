@@ -61,7 +61,7 @@ namespace GenesisBlog.Utilities
                 return sb.ToString();
         }
 
-        public string RemapInternationalCharToAscii(char c)
+        private string RemapInternationalCharToAscii(char c)
         {
             string s = c.ToString().ToLowerInvariant();
 
