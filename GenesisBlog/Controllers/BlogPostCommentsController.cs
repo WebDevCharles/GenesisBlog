@@ -60,7 +60,9 @@ namespace GenesisBlog.Controllers
             {
                 _context.Add(blogPostComment);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                //return RedirectToAction(nameof(Index));
+
+                return RedirectToAction("Details", "BlogPosts", new { id = blogPostComment.BlogPostId });
             }
             ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Abstract", blogPostComment.BlogPostId);
             return View(blogPostComment);

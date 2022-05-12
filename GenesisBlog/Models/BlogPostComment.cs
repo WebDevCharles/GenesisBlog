@@ -11,8 +11,7 @@ namespace GenesisBlog.Models
         public string Comment { get; set; } = string.Empty;
 
         // Navigational Properties
-        public virtual BlogPost BlogPost { get; set; } = default!;
-
+        public virtual BlogPost? BlogPost { get; set; }
 
     }
 }

@@ -26,9 +26,6 @@
                 @Html.DisplayNameFor(model => model.Abstract)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Content)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.ImageData)
             </th>
             <th>
@@ -50,21 +47,20 @@
                     @Html.DisplayFor(modelItem => item.Title)
                 </td>
                 <td>
-                    @foreach(var tag in item.Tags)
+                    @foreach (var tag in item.Tags)
                     {
-                        @tag.Text<br>
+                        @tag.Text
+
+                        <br>
                     }
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Abstract)
                 </td>
                 <td>
-                    @Html.Raw(item.Content)
-                </td>
-                <td>
                     @if (item.ImageData.Length > 0)
                     {
-                        <img src="@_imageService.ConvertByteArrayToFile(item.ImageData, item.ImageType)" class="img-fluid w-25 h-25">
+                        <img src="@_imageService.ConvertByteArrayToFile(item.ImageData, item.ImageType)" class="img-fluid img-thumbnail mt-2 mb-4" style="width:120px;height:120px">
                     }
                 </td>
                 <td>

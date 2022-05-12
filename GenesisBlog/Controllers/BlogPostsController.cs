@@ -53,12 +53,10 @@ namespace GenesisBlog.Controllers
         // GET: BlogPosts/Create
         public IActionResult Create()
         {
-            //1: What data does the select list contain
-            //2. The property that gets transmitted to HttpPost
-            //3. The property that gets shown to the user
+            BlogPost blogPost = new BlogPost();
             ViewData["TagIds"] = new MultiSelectList(_context.Tag, "Id", "Text");
 
-            return View();
+            return View(blogPost);
         }
 
         // POST: BlogPosts/Create
@@ -66,7 +64,7 @@ namespace GenesisBlog.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Abstract,Content,ImageFile,ImageType,ImageData,BlogPostState")] BlogPost blogPost, IFormFile myImage, List<int> tagIds)
+        public async Task<IActionResult> Create([Bind("Title,Abstract,Content,ImageFile,ImageType,ImageData,BlogPostState")] BlogPost blogPost, List<int> tagIds)
         {
             if (ModelState.IsValid)
             {
@@ -87,11 +85,12 @@ namespace GenesisBlog.Controllers
 
                 //Before I try interacting with the IFormFile
                 //I should make sure it's present
-                if (myImage is not null)
+                if (blogPost.ImageFile is not null)
                 {
-                    blogPost.ImageData = await _imageService.ConvertFileToByteArrayAsync(myImage);
-                    blogPost.ImageType = myImage.ContentType;
+                    blogPost.ImageData = await _imageService.ConvertFileToByteArrayAsync(blogPost.ImageFile);
+                    blogPost.ImageType = blogPost.ImageFile.ContentType;
                 }
+                ViewData["TagIds"] = new MultiSelectList(_context.Tag, "Id", "Text", tagIds);
 
                 //Associate any/all selected tags with the BlogPost
                 foreach (var tagId in tagIds)
@@ -135,7 +134,7 @@ namespace GenesisBlog.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Abstract,Content,BlogPostState")] BlogPost blogPost, IFormFile file, List<int> tagIds)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Abstract,Content,BlogPostState,ImageFile")] BlogPost blogPost, List<int> tagIds)
         {
             if (id != blogPost.Id)
             {
@@ -146,6 +145,7 @@ namespace GenesisBlog.Controllers
             {
                 try
                 {
+
                     //This code gets whats known as a "Tracked entity". By default, most LINQ
                     //statement that pull data from a DB are tracked. In fact, if you don't it tracked
                     //you have to use extra code to tell it so.. AsNoTracking()
@@ -158,12 +158,19 @@ namespace GenesisBlog.Controllers
                     if (newSlug != existingPost.Slug)
                     {
                         if (_context.BlogPosts.Any(b => b.Slug == newSlug))
-                    {
+                        {
                             ModelState.AddModelError("Title", "The Title must be changed, because it has already been used.");
                             ViewData["TagIds"] = new MultiSelectList(_context.Tag, "Id", "Text", tagIds);
                             return View(blogPost);
                         }
                     }
+
+                    if (blogPost.ImageFile is not null)
+                    {
+                        existingPost.ImageData = await _imageService.ConvertFileToByteArrayAsync(blogPost.ImageFile);
+                        existingPost.ImageType = blogPost.ImageFile.ContentType;
+                    }
+
 
                     existingPost.Tags.Clear();
                     await _context.SaveChangesAsync();
