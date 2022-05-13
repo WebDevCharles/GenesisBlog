@@ -1,6 +1,7 @@
 ﻿#nullable disable
 using GenesisBlog.Data;
 using GenesisBlog.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -74,6 +75,7 @@ namespace GenesisBlog.Controllers
         }
 
         // GET: BlogPostComments/Edit/5
+        [Authorize(Roles="Moderator")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)

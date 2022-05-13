@@ -6,6 +6,7 @@ using GenesisBlog.Data;
 using GenesisBlog.Models;
 using GenesisBlog.Services.Interfaces;
 using GenesisBlog.Utilities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GenesisBlog.Controllers
 {
@@ -55,6 +56,7 @@ namespace GenesisBlog.Controllers
         }
 
         // GET: BlogPosts/Create
+        [Authorize(Roles="Admin")]
         public IActionResult Create()
         {
             BlogPost blogPost = new BlogPost();

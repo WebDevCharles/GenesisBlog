@@ -2,6 +2,7 @@ using GenesisBlog.Data;
 using GenesisBlog.Models;
 using GenesisBlog.Services;
 using GenesisBlog.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -15,15 +16,24 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<BlogUser>(options => options.SignIn.RequireConfirmedAccount = true)
+
+//builder.Services.AddDefaultIdentity<BlogUser>(options => options.SignIn.RequireConfirmedAccount = true)
+//    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddIdentity<BlogUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddDefaultTokenProviders()
+    .AddDefaultUI()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
 // Custom Services //
 builder.Services.AddScoped<IImageService, ImageService>();
-
+builder.Services.AddTransient<DataService>();
 
 var app = builder.Build();
+
+var scope = app.Services.CreateScope();
+var dataService = scope.ServiceProvider.GetRequiredService<DataService>();
+await dataService.SetupDBAsync();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
