@@ -1,13 +1,40 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// Write your JavaScript code.
+﻿/*!
+* Start Bootstrap - Clean Blog v6.0.8 (https://startbootstrap.com/theme/clean-blog)
+* Copyright 2013-2022 Start Bootstrap
+* Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-clean-blog/blob/master/LICENSE)
+*/
+window.addEventListener('DOMContentLoaded', () => {
+    let scrollPos = 0;
+    const mainNav = document.getElementById('mainNav');
+    const headerHeight = mainNav.clientHeight;
+    window.addEventListener('scroll', function () {
+        const currentTop = document.body.getBoundingClientRect().top * -1;
+        if (currentTop < scrollPos) {
+            // Scrolling Up
+            if (currentTop > 0 && mainNav.classList.contains('is-fixed')) {
+                mainNav.classList.add('is-visible');
+            } else {
+                console.log(123);
+                mainNav.classList.remove('is-visible', 'is-fixed');
+            }
+        } else {
+            // Scrolling Down
+            mainNav.classList.remove(['is-visible']);
+            if (currentTop > headerHeight && !mainNav.classList.contains('is-fixed')) {
+                mainNav.classList.add('is-fixed');
+            }
+        }
+        scrollPos = currentTop;
+    });
+})
 
 var quill = new Quill('#quillEditor', {
+    placeholder: 'Create a post...',
     theme: 'snow'
 });
 
-document.querySelector("form").addEventListener("submit", function () {
+    document.querySelector("form").addEventListener("submit", function () {
+
     //Stuff the data currently inside of the Quill editor inside the hidden input the name="Content"
     document.getElementById("Content").value = quill.container.firstChild.innerHTML;
 })

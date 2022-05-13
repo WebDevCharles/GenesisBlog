@@ -1,6 +1,7 @@
 ﻿#nullable disable
 using GenesisBlog.Data;
 using GenesisBlog.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,12 @@ namespace GenesisBlog.Controllers
     public class BlogPostCommentsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<BlogUser> _userManager;
 
-        public BlogPostCommentsController(ApplicationDbContext context)
+        public BlogPostCommentsController(ApplicationDbContext context, UserManager<BlogUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: BlogPostComments
@@ -54,15 +57,17 @@ namespace GenesisBlog.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,BlogPostId,Comment")] BlogPostComment blogPostComment)
+        public async Task<IActionResult> Create([Bind("BlogPostId,Comment")] BlogPostComment blogPostComment)
         {
             if (ModelState.IsValid)
             {
+                blogPostComment.Created = DateTime.UtcNow;
+                blogPostComment.AuthorId = _userManager.GetUserId(User);
+
                 _context.Add(blogPostComment);
                 await _context.SaveChangesAsync();
-                //return RedirectToAction(nameof(Index));
 
-                return RedirectToAction("Details", "BlogPosts", new { id = blogPostComment.BlogPostId });
+                return RedirectToAction("Details", "BlogPosts", new { Id = blogPostComment.BlogPostId });
             }
             ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Abstract", blogPostComment.BlogPostId);
             return View(blogPostComment);
