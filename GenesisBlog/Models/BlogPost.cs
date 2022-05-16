@@ -1,9 +1,10 @@
-﻿using GenesisBlog.Models.Enums;
+﻿using GenesisBlog.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GenesisBlog.Models
 {
+    [Display(Name = "Blog Post")]
     public class BlogPost
     {
         public int Id { get; set; } // This turns into an auto-incrementing integer

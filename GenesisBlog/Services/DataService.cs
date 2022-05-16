@@ -55,30 +55,42 @@ namespace GenesisBlog.Services
                 EmailConfirmed = true,
             };
 
-            var newUser = await _userManager.FindByEmailAsync(email);
-            if(newUser == null)
+            var existingUser = await _userManager.FindByEmailAsync(email);
+            if (existingUser is null)
             {
-                await _userManager.CreateAsync(user, "Blu3j3ll0!");
+                await _userManager.CreateAsync(user, "Purpl3Walru$!");
                 await _userManager.AddToRoleAsync(user, "Admin");
             }
 
-            string emailModerator = "JasonTwichell@mailinator.com";
-            BlogUser userModerator = new()
+            email = "JasonTwichell@mailinator.com";
+            user = new()
             {
-                UserName = emailModerator,
-                Email = emailModerator,
+                UserName = email,
+                Email = email,
                 FirstName = "Jason",
                 LastName = "Twichell",
                 EmailConfirmed = true,
             };
 
-            var newUserModerator = await _userManager.FindByEmailAsync(emailModerator);
-            if (newUserModerator == null)
+            existingUser = await _userManager.FindByEmailAsync(email);
+            if (existingUser is null)
             {
-                await _userManager.CreateAsync(user, "PicklesRYummy!");
+                await _userManager.CreateAsync(user, "P1cklesRYummy!");
                 await _userManager.AddToRoleAsync(user, "Moderator");
             }
 
+        }
+
+        private async Task SeedTagsAsync()
+        {
+            if (_dbContext.Tag.Count() == 0)
+            {
+                await _dbContext.AddAsync(new Tag() { Text = "Role Based Security" });
+                await _dbContext.AddAsync(new Tag() { Text = "Scaffolding Against A Model" });
+                await _dbContext.AddAsync(new Tag() { Text = "Customizing Identity" });
+                await _dbContext.AddAsync(new Tag() { Text = "Working With Interfaces" });
+                await _dbContext.SaveChangesAsync();
+            }
         }
 
 

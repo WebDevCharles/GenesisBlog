@@ -1,4 +1,8 @@
-﻿@model IEnumerable<BlogPost>
+﻿@using GenesisBlog.Services.Interfaces
+
+@model IEnumerable<BlogPost>
+@inject IImageService imageService;
+
 
 @{
     ViewData["Title"] = "Genesis Blog";
@@ -11,6 +15,10 @@
 
             @foreach (var blogPost in Model)
             {
+                @*<div class="col-6">
+                    <img class="img-fluid" src="@imageService.ConvertByteArrayToFile(blogPost.ImageData, blogPost.ImageType)">
+                </div>
+                <div class="col-8">*@
                 <!-- Post preview-->
                 <div class="post-preview">
                     <a asp-controller="BlogPosts" asp-action="Details" asp-route-id="@blogPost.Id">
@@ -24,8 +32,8 @@
                 </div>
                 <!-- Divider-->
                 <hr class="my-4" />
+                @*</div>*@
             }
-
             <!-- Pager-->
             <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href="#!">Older Posts →</a></div>
         </div>

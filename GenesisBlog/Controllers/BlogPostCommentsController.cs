@@ -75,7 +75,6 @@ namespace GenesisBlog.Controllers
         }
 
         // GET: BlogPostComments/Edit/5
-        [Authorize(Roles="Moderator")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -104,31 +103,31 @@ namespace GenesisBlog.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    _context.Update(blogPostComment);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BlogPostCommentExists(blogPostComment.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                var existingComment = await _context.BlogPostComment.FindAsync(blogPostComment.Id);
+                existingComment.Comment = blogPostComment.Comment;
+                existingComment.Updated = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Details", "BlogPosts", new { id = existingComment.BlogPostId });
             }
-            ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Abstract", blogPostComment.BlogPostId);
-            return View(blogPostComment);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BlogPostCommentExists(blogPostComment.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+
+            }
         }
 
         // GET: BlogPostComments/Delete/5
+        [Authorize(Roles = "Moderator")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)

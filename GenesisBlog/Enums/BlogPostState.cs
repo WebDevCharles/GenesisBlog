@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GenesisBlog.Models.Enums
+namespace GenesisBlog.Enums
 {
     public enum BlogPostState
     {

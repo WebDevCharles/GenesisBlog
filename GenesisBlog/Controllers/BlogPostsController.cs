@@ -1,15 +1,18 @@
 ﻿#nullable disable
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using GenesisBlog.Data;
+using GenesisBlog.Enums;
 using GenesisBlog.Models;
 using GenesisBlog.Services.Interfaces;
 using GenesisBlog.Utilities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace GenesisBlog.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class BlogPostsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -30,6 +33,26 @@ namespace GenesisBlog.Controllers
                                                   .ToListAsync();
 
             return View(posts);
+        }
+
+        public async Task<IActionResult> InDevIndex()
+        {
+            var posts = await _context.BlogPosts
+                                .Include(b => b.Tags)
+                                .Where(b => b.BlogPostState == BlogPostState.InDevelopment)
+                                .ToListAsync();
+
+            return View("Index", posts);
+        }
+
+        public async Task<IActionResult> InPreviewIndex()
+        {
+            var posts = await _context.BlogPosts
+                                .Include(b => b.Tags)
+                                .Where(b => b.BlogPostState == BlogPostState.InPreview)
+                                .ToListAsync();
+
+            return View("Index", posts);
         }
 
         // GET: BlogPosts/Details/5
@@ -56,7 +79,7 @@ namespace GenesisBlog.Controllers
         }
 
         // GET: BlogPosts/Create
-        [Authorize(Roles="Admin")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             BlogPost blogPost = new BlogPost();
@@ -112,6 +135,7 @@ namespace GenesisBlog.Controllers
         }
 
         // GET: BlogPosts/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -218,6 +242,7 @@ namespace GenesisBlog.Controllers
         }
 
         // GET: BlogPosts/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)

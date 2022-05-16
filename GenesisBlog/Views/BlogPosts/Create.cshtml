@@ -1,65 +1,72 @@
-﻿@using GenesisBlog.Models.Enums
-@model GenesisBlog.Models.BlogPost
+﻿@using GenesisBlog.Models
+@using GenesisBlog.Enums
+@using GenesisBlog.Services.Interfaces
+
+@inject IImageService _imageService
+
+@model BlogPost
 
 @{
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<div class="container">
+    <h1>Create</h1>
 
-<h4>Blog Post</h4>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Create" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group mb-2">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-2">
-                <label asp-for="Abstract" class="control-label"></label>
-                <input asp-for="Abstract" class="form-control" />
-                <span asp-validation-for="Abstract" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-2">
-                <label asp-for="Content" class="control-label"></label>
-                <div id="quillEditor">
-                    @if (Model != null)
-                    {
-                        @Html.Raw(Model.Content)
-                    }
+    <h4>Blog Post:</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <form id="frmCreate" asp-action="Create" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group mb-2">
+                    <label asp-for="Title" class="control-label"></label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
                 </div>
-                <input type="hidden" asp-for="Content" />
-                <span asp-validation-for="Content" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-2">
-                <label asp-for="Tags" class="control-label"></label>
-                <select name="TagIds" class="form-control" asp-items="ViewBag.TagIds" multiple></select>
-            </div>
-            <div class="form-group mb-2">
-                <label asp-for="BlogPostState" class="control-label"></label>
-                <select asp-for="BlogPostState" asp-items="@Html.GetEnumSelectList<BlogPostState>()" class="form-control"></select>
-                <span asp-validation-for="BlogPostState" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-2">
-                <label asp-for="ImageFile" class="control-label"></label>
-                <input asp-for="ImageFile" type="file" class="form-control" onchange="document.getElementById('blogImage').src = window.URL.createObjectURL(this.files[0])" />
-                <span asp-validation-for="ImageFile" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-5">
-                <img id="blogImage" class="img-fluid img-thumbnail mt-2 mb-4" style="width:120px;height:120px" src="https://cdn.icon-icons.com/icons2/233/PNG/512/Contacts_26253.png">
-            </div>
-            <div class="form-group mb-2">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+                <div class="form-group mb-2">
+                    <label asp-for="Abstract" class="control-label"></label>
+                    <input asp-for="Abstract" class="form-control" />
+                    <span asp-validation-for="Abstract" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="Content" class="control-label"></label>
+                    <div id="quillEditor">
+                        @if (Model != null)
+                        {
+                            @Html.Raw(Model.Content)
+                        }
+                    </div>
+                    <input type="hidden" asp-for="Content" />
+                    <span asp-validation-for="Content" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="Tags" class="control-label"></label>
+                    <select name="TagIds" class="form-control" asp-items="ViewBag.TagIds" multiple></select>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="BlogPostState" class="control-label"></label>
+                    <select asp-for="BlogPostState" class="form-control" asp-items="@Html.GetEnumSelectList<BlogPostState>()"></select>
+                    <span asp-validation-for="BlogPostState" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="ImageFile" class="control-label"></label>
+                    <input asp-for="ImageFile" type="file" class="form-control" onchange="document.getElementById('blogImage').src = window.URL.createObjectURL(this.files[0])" />
+                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-5">
+                    <img id="blogImage" class="img-fluid img-thumbnail mt-2 mb-4" style="width:120px;height:120px" src="https://cdn.icon-icons.com/icons2/233/PNG/512/Contacts_26253.png">
+                </div>
+                <div class="form-group mb-2">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+    <div>
+        <a asp-action="Index">Back to List</a>
+    </div>
 </div>
 
 @section Scripts {

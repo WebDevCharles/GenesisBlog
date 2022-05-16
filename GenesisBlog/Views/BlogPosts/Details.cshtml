@@ -1,10 +1,15 @@
-﻿@model BlogPost
+﻿@using Microsoft.AspNetCore.Identity
+@model BlogPost
+@inject UserManager<BlogUser> _userManager
 
 @{
     ViewData["Title"] = "Details";
+
     ViewData["BlogPostTitle"] = Model.Title;
     ViewData["Abstract"] = Model.Abstract;
     ViewData["Created"] = Model.Created.ToString("MMM dd, yyyy");
+    ViewData["ImageData"] = Model.ImageData;
+    ViewData["ImageType"] = Model.ImageType;
 }
 
 <!-- Post Content-->
@@ -15,29 +20,25 @@
                 @Html.Raw(Model.Content)
             </div>
         </div>
-
-        <div class="row row-cols-1 row-cols-md-4 g-4">
+        <div class="row row-cols-1 row-cols-md-4 g-4 text-center">
             @foreach (var tag in Model.Tags)
             {
                 <div class="col">
-                    <a class="btn btn-warning btn-outline-dark">@tag.Text</a>
+                    <a class="btn btn-warning btn-outline-dark w-100">@tag.Text</a>
                 </div>
             }
         </div>
     </div>
 </article>
 
-
-<div>
-    @*    The user will be able to read all comments BUT if they want to leave a comment they must be logged in*@
+<div id="ScrollTo">
     @if (User.Identity!.IsAuthenticated)
     {
         <form asp-controller="BlogPostComments" asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            @*<input type="hidden" asp-for="@Model.Id">*@
             <input type="hidden" name="BlogPostId" value="@Model.Id">
 
-            <div class="form-group">
+            <div class="form-group mb-2">
                 <label class="control-label">Add Comment</label>
                 <input name="Comment" class="form-control" />
             </div>
@@ -54,6 +55,7 @@
             </div>
         </div>
     }
+
     <hr />
 
     <div class="row row-cols-1 g-2">
@@ -63,19 +65,94 @@
                 <div class="card-header">
                     Author: @comment.Author!.FullName
                 </div>
-                <div class="card-body">
+
+                <div id="Target-@(comment.Id)" class="card-body">
                     @comment.Comment
                 </div>
+
                 <div class="card-footer">
                     Created on: @comment.Created.ToString("MMM dd, yyyy")
+
+                    @*If this is MY comment AND it has not been moderated*@
+                    @if (comment.AuthorId == _userManager.GetUserId(User) && comment.Moderated is null)
+                    {
+                        <button class="btn btn-sm btn-dark float-end btnEdit" data-bs-toggle="modal" data-bs-target="#ModalEdit" data-target-id="@comment.Id">EDIT</button>
+                    }
+
+                    @if (User.IsInRole("Moderator"))
+                    {
+                        <button class="btn btn-sm btn-danger btn-outline-dark float-end ms-2" data-bs-toggle="modal" data-bs-target="#ModalModerate">MODERATE</button>
+                    }
+
                 </div>
             </div>
         }
-
     </div>
+
 </div>
 
-<div>
+<div class="mb-2">
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+
+@*Stack up all my modals here...*@
+
+<!-- Modal -->
+<div class="modal fade" id="ModalEdit" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit Modal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <form id="frmEdit" asp-controller="BlogPostComments" asp-action="Edit">                  
+                    <input type="hidden" name="Id" id="ModalId" />
+                    <div class="form-group mb-3">
+                        <label class="control-label">Comment</label>
+                        <textarea name="Comment" id="ModalComment" class="form-control" rows=5></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button id="btnSave" type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="ModalModerate" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Moderate Modal</h5>
+                <button id="btnSubmit" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-dark" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-sm btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.querySelectorAll("button.btnEdit").forEach( (btn) => {
+        btn.addEventListener("click", function(){
+            let targetId = this.getAttribute("data-target-id");
+             document.getElementById("ModalId").value = targetId;
+             document.getElementById("ModalComment").innerText = document.getElementById(`Target-${targetId}`).innerText;
+        });
+    });
+    document.getElementById("btnSave").addEventListener("click", function(){
+        document.getElementById("frmEdit").submit();
+    })
+</script>
+}
