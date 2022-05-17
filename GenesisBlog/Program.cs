@@ -29,6 +29,7 @@ builder.Services.AddControllersWithViews();
 // Custom Services //
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddTransient<DataService>();
+builder.Services.AddScoped<DisplayService>();
 
 var app = builder.Build();
 

@@ -108,8 +108,43 @@ namespace GenesisBlog.Controllers
                 var existingComment = await _context.BlogPostComment.FindAsync(blogPostComment.Id);
                 existingComment.Comment = blogPostComment.Comment;
                 existingComment.Updated = DateTime.UtcNow;
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Details", "BlogPosts", new { id = existingComment.BlogPostId });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BlogPostCommentExists(blogPostComment.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Moderate(int id, [Bind("Id,ModReason,ModeratedComment")] BlogPostComment blogPostComment)
+        {
+            if (id != blogPostComment.Id)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                var existingComment = await _context.BlogPostComment.FindAsync(blogPostComment.Id);
+                existingComment.ModeratedComment = blogPostComment.ModeratedComment;
+                existingComment.ModReason = blogPostComment.ModReason;
+                existingComment.Moderated = DateTime.UtcNow;
+                existingComment.ModeratorId = _userManager.GetUserId(User);
+
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Details", "BlogPosts", new { id = existingComment.BlogPostId }, "ScrollTo");
             }
             catch (DbUpdateConcurrencyException)
             {

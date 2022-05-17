@@ -1,6 +1,9 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@using GenesisBlog.Enums
+@using Microsoft.AspNetCore.Identity
+@using GenesisBlog.Services
 @model BlogPost
 @inject UserManager<BlogUser> _userManager
+@inject DisplayService _displayService
 
 @{
     ViewData["Title"] = "Details";
@@ -63,16 +66,38 @@
         {
             <div class="col card border border-1 border-dark mb-3">
                 <div class="card-header">
-                    Author: @comment.Author!.FullName
+                    @if (comment.Moderated is null)
+                    {
+                        <span>Author: @comment.Author!.FullName</span>
+                    }
+                    else
+                    {
+                        <h6>Moderator: @await _displayService.DisplayModName(comment.ModeratorId!)</h6>
+                        <h6>Reason: @comment.ModReason</h6>
+                        <span>Author: @comment.Author!.FullName</span>
+                    }
                 </div>
 
                 <div id="Target-@(comment.Id)" class="card-body">
-                    @comment.Comment
+                    @if (comment.Moderated is null)
+                    {
+                        @comment.Comment
+                    }
+                    else
+                    {
+                        @comment.ModeratedComment
+                    }
                 </div>
 
                 <div class="card-footer">
-                    Created on: @comment.Created.ToString("MMM dd, yyyy")
-
+                    @if (comment.Moderated is null)
+                    {
+                        <h6>Created on: @comment.Created.ToString("MMM dd, yyyy")</h6>
+                    }
+                    else
+                    {
+                        <h6>Moderated on: @comment.Moderated?.ToString("MMM dd, yyyy")</h6>
+                    }
                     @*If this is MY comment AND it has not been moderated*@
                     @if (comment.AuthorId == _userManager.GetUserId(User) && comment.Moderated is null)
                     {
@@ -81,7 +106,14 @@
 
                     @if (User.IsInRole("Moderator"))
                     {
-                        <button class="btn btn-sm btn-danger btn-outline-dark float-end ms-2" data-bs-toggle="modal" data-bs-target="#ModalModerate">MODERATE</button>
+                        if (comment.Moderated is null)
+                        {
+                            <button class="btn btn-sm btn-danger btn-outline-dark float-end ms-2 btnMod" data-bs-toggle="modal" data-bs-target="#ModalModerate" data-target-id="@comment.Id">MODERATE</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-danger btn-outline-dark float-end ms-2 btnMod" data-bs-toggle="modal" data-bs-target="#ModalModerate" data-target-id="@comment.Id" data-mod-reason="@comment.ModReason!.Value">MODERATE</button>
+                        }
                     }
 
                 </div>
@@ -107,11 +139,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-
-                <form id="frmEdit" asp-controller="BlogPostComments" asp-action="Edit">                  
+                <form id="frmEdit" asp-controller="BlogPostComments" asp-action="Edit">
                     <input type="hidden" name="Id" id="ModalId" />
                     <div class="form-group mb-3">
-                        <label class="control-label">Comment</label>
+                        <label class="control-label">Comment:</label>
                         <textarea name="Comment" id="ModalComment" class="form-control" rows=5></textarea>
                     </div>
                 </form>
@@ -125,6 +156,19 @@
 </div>
 
 <!-- Modal -->
+@*// Original comment but viewed as read-only
+// Record the reason for the Moderation
+// Allow the Moderator to enter the new comment
+// The comment Id needs to be hidden in the form
+// Record in the HttpPost -
+// Moderator Id
+// Add Moderation date
+// After redirect back to the BlogPost Details Comment Section, - I want to see the following:
+// Moderation reason
+// Moderation date
+// Moderator name
+// The Moderated comment*@
+
 <div class="modal fade" id="ModalModerate" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -133,26 +177,62 @@
                 <button id="btnSubmit" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <form id="frmMod" asp-controller="BlogPostComments" asp-action="Moderate">
+                    <input type="hidden" name="Id" id="ModalModId" />
+                    <div class="form-group mb-3">
+                        <label class="control-label">Original Comment:</label>
+                        <textarea id="ModalModCommentReadOnly" class="form-control" rows=5 readonly></textarea>
+                    </div>
+                    <hr />
+                    <div class="form-group mb-3">
+                        <label class="control-label">Moderation Reason:</label>
+                        <select name="ModReason" class="form-control" asp-items="@Html.GetEnumSelectList<ModReason>()"></select>
+                    </div>
+                    <hr />
+                    <div class="form-group mb-3">
+                        <label class="control-label">Moderated Comment:</label>
+                        <textarea name="ModeratedComment" id="ModalModComment" class="form-control" rows=5></textarea>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-dark" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-sm btn-primary">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button id="btnModSave" type="button" class="btn btn-primary">Save changes</button>
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-<script>
-    document.querySelectorAll("button.btnEdit").forEach( (btn) => {
-        btn.addEventListener("click", function(){
-            let targetId = this.getAttribute("data-target-id");
-             document.getElementById("ModalId").value = targetId;
-             document.getElementById("ModalComment").innerText = document.getElementById(`Target-${targetId}`).innerText;
+    <script>
+        document.querySelectorAll("button.btnEdit").forEach((btn) => {
+            btn.addEventListener("click", function() {
+                let targetId = this.getAttribute("data-target-id");
+                document.getElementById("ModalId").value = targetId;
+                document.getElementById("ModalComment").innerText = document.getElementById(`Target-${targetId}`).innerText;
+            });
         });
-    });
-    document.getElementById("btnSave").addEventListener("click", function(){
-        document.getElementById("frmEdit").submit();
-    })
-</script>
+        document.getElementById("btnSave").addEventListener("click", function() {
+            document.getElementById("frmEdit").submit();
+        })
+    </script>
+
+    <script>
+        document.querySelectorAll("button.btnMod").forEach((btn) => {
+            btn.addEventListener("click", function() {
+                let targetId = this.getAttribute("data-target-id");
+                document.getElementById("ModalModId").value = targetId;
+
+                let originalComment = document.getElementById(`Target-${targetId}`).innerText;
+                document.getElementById("ModalModCommentReadOnly").innerText = originalComment;
+                document.getElementById("ModalModComment").innerText = originalComment;
+
+                let modReason = this.getAttribute("data-mod-reason");
+                document.getElementById("ModReason").value = modReason;
+            });
+        });
+        document.getElementById("btnModSave").addEventListener("click", function() {
+            document.getElementById("frmMod").submit();
+        })
+    </script>
 }

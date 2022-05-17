@@ -8,6 +8,7 @@ namespace GenesisBlog.Models
         public int Id { get; set; }
         public int BlogPostId { get; set; }
         public string AuthorId { get; set; } = Guid.Empty.ToString();
+        public string? ModeratorId { get; set; }
         public DateTime Created { get; set; }
         public DateTime? Updated { get; set; }
 
@@ -17,10 +18,10 @@ namespace GenesisBlog.Models
 
 
         public DateTime? Moderated { get; set; }
-        public string? ModeratedId { get; set; }
         public string? ModeratedComment { get; set; }
         public ModReason? ModReason { get; set; }
         public bool IsDeleted { get; set; }
+        public string? ModeratorName { get; set; }
 
 
         // Navigational Properties
