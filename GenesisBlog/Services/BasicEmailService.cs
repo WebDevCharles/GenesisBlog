@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
-using MimeKit;
-using MailKit.Net.Smtp;
+﻿using MailKit.Net.Smtp;
 using MailKit.Security;
-using System.Text;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using MimeKit;
 
 namespace GenesisBlog.Services
 {
