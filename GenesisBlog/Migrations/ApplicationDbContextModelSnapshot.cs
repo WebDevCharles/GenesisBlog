@@ -3,19 +3,17 @@ using System;
 using GenesisBlog.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace GenesisBlog.Data.Migrations
+namespace GenesisBlog.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220516204535_ModalAddition")]
-    partial class ModalAddition
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -124,7 +122,10 @@ namespace GenesisBlog.Data.Migrations
                     b.Property<string>("ModeratedComment")
                         .HasColumnType("text");
 
-                    b.Property<string>("ModeratedId")
+                    b.Property<string>("ModeratorId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModeratorName")
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("Updated")

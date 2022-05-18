@@ -4,6 +4,7 @@ namespace GenesisBlog.Helper
 {
     public static class ConnectionHelper
     {
+        //This is a random addition
         public static string GetConnectionString(IConfiguration configuration)
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");
