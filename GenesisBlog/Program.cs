@@ -3,6 +3,7 @@ using GenesisBlog.Models;
 using GenesisBlog.Services;
 using GenesisBlog.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -30,6 +31,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddTransient<DataService>();
 builder.Services.AddScoped<DisplayService>();
+builder.Services.AddScoped<IEmailSender, BasicEmailService>();
 
 var app = builder.Build();
 
