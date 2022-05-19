@@ -18,6 +18,13 @@ namespace GenesisBlog.Models
         [NotMapped]
         public string? FullName { get { return $"{FirstName} {LastName}"; } }
 
+        public byte[]? ImageData { get; set; }
+        public string? ImageType { get; set; }
+
+        [NotMapped]
+        [Display(Name = "Image File")]
+        public IFormFile? ImageFile { get; set; }
+
         public virtual ICollection<BlogPostComment> BlogPostComments { get; set; } = new HashSet<BlogPostComment>();
 
     }

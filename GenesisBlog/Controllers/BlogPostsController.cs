@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GenesisBlog.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    
     public class BlogPostsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -56,10 +56,32 @@ namespace GenesisBlog.Controllers
         }
 
         // GET: BlogPosts/Details/5
-        public async Task<IActionResult> Details(int? id)
+        //public async Task<IActionResult> Details(int? id)
+        //{
+
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    var blogPost = await _context.BlogPosts
+        //        .Include(b => b.Tags)
+        //        .Include(b => b.BlogPostComments)
+        //        .ThenInclude(c => c.Author)
+        //        .FirstOrDefaultAsync(m => m.Id == id);
+
+        //    if (blogPost == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return View(blogPost);
+        //}
+
+        public async Task<IActionResult> Details(string slug)
         {
 
-            if (id == null)
+            if (string.IsNullOrEmpty(slug))
             {
                 return NotFound();
             }
@@ -68,7 +90,7 @@ namespace GenesisBlog.Controllers
                 .Include(b => b.Tags)
                 .Include(b => b.BlogPostComments)
                 .ThenInclude(c => c.Author)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Slug == slug);
 
             if (blogPost == null)
             {
@@ -143,9 +165,7 @@ namespace GenesisBlog.Controllers
                 return NotFound();
             }
 
-            var blogPost = await _context.BlogPosts
-                                                      .Include(b => b.Tags)
-                                                      .FirstOrDefaultAsync(b => b.Id == id);
+            var blogPost = await _context.BlogPosts.Include(b => b.Tags).FirstOrDefaultAsync(b => b.Id == id);
 
             if (blogPost == null)
             {

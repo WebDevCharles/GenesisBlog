@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // Add services to the container.
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 var connectionString = ConnectionHelper.GetConnectionString(builder.Configuration);
@@ -61,9 +60,17 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Configured a second, custom route - just for BlogPost/Details
+app.MapControllerRoute(
+    name: "details",
+    pattern: "PostDetails/{slug}",
+    defaults: new { controller = "BlogPosts", action = "Details" }
+    );
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.MapRazorPages();
 
 app.Run();

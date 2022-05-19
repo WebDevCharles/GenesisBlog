@@ -68,7 +68,8 @@ namespace GenesisBlog.Controllers
                 _context.Add(blogPostComment);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("Details", "BlogPosts", new { Id = blogPostComment.BlogPostId });
+                var blogPost = await _context.BlogPosts.FirstOrDefaultAsync(b => b.Id == blogPostComment.BlogPostId);
+                return RedirectToAction("Details", "BlogPosts", new { slug = blogPost.Slug }, "ScrollTo");
             }
             ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Abstract", blogPostComment.BlogPostId);
             return View(blogPostComment);
@@ -108,9 +109,11 @@ namespace GenesisBlog.Controllers
                 var existingComment = await _context.BlogPostComment.FindAsync(blogPostComment.Id);
                 existingComment.Comment = blogPostComment.Comment;
                 existingComment.Updated = DateTime.UtcNow;
-
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Details", "BlogPosts", new { id = existingComment.BlogPostId });
+
+                var blogPost = await _context.BlogPosts.FirstOrDefaultAsync(b => b.Id == existingComment.BlogPostId);
+
+                return RedirectToAction("Details", "BlogPosts", new { slug = blogPost!.Slug }, "ScrollTo");
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -144,7 +147,9 @@ namespace GenesisBlog.Controllers
                 existingComment.ModeratorId = _userManager.GetUserId(User);
 
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Details", "BlogPosts", new { id = existingComment.BlogPostId }, "ScrollTo");
+
+                var blogPost = await _context.BlogPosts.FirstOrDefaultAsync(b => b.Id == existingComment.BlogPostId);
+                return RedirectToAction("Details", "BlogPosts", new { slug = blogPost.Slug }, "ScrollTo");
             }
             catch (DbUpdateConcurrencyException)
             {
