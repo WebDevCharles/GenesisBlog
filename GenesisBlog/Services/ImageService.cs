@@ -12,6 +12,11 @@ namespace GenesisBlog.Services
             return srcString;
         }
 
+        public string ConvertByteArrayToFile(string userImageData, string? imageType)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<byte[]> ConvertFileToByteArrayAsync(IFormFile file)
         {
             try

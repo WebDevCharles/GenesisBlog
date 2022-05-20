@@ -1,0 +1,41 @@
+﻿@using GenesisBlog.Services.Interfaces
+
+@model IEnumerable<BlogPost>
+@inject IImageService imageService;
+
+
+@{
+    ViewData["Title"] = "Search Results";
+}
+
+<!-- Main Content-->
+<div class="container px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-7">
+
+            @foreach (var blogPost in Model)
+            {
+                @*<div class="col-6">
+                    <img class="img-fluid" src="@imageService.ConvertByteArrayToFile(blogPost.ImageData, blogPost.ImageType)">
+                </div>
+                <div class="col-8">*@
+                <!-- Post preview-->
+                <div class="post-preview">
+                    <a asp-controller="BlogPosts" asp-action="Details" asp-route-slug="@blogPost.Slug">
+                        <h2 class="post-title">@blogPost.Title</h2>
+                        <h3 class="post-subtitle">@blogPost.Abstract</h3>
+                    </a>
+                    <p class="post-meta">
+                        Posted by <a href="#">Charles Hall</a>
+                        on @blogPost.Created.ToString("MMM dd, yyyy")
+                    </p>
+                </div>
+                <!-- Divider-->
+                <hr class="my-4" />
+                @*</div>*@
+            }
+            
+        </div>
+    </div>
+</div>
+

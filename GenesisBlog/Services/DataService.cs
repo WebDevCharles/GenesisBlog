@@ -30,7 +30,29 @@ namespace GenesisBlog.Services
             //Adds 2 records into the AspNetRoles table
             await SeedRolesAsync();
             await SeedUsersAsync();
+            await SeedTagsAsync();
 
+            await SeedTestBlogs();
+
+        }
+
+        private async Task SeedTestBlogs()
+        {
+            if (_dbContext.BlogPosts.Any())
+                return;
+
+            for (var loop = 1;loop <= 10;loop++)
+            {
+                _dbContext.Add(new BlogPost()
+                {
+                    Title = $"Blog Title {loop}: The importance of {loop}'s in coding...",
+                    Abstract = $"Have you ever wondered why the number of {loop} plays such a significant role in coding?",
+                    Content = "Test Content...",
+                    Created = DateTime.UtcNow.AddDays(-loop),
+                    Slug = $"blog-title-{loop}-the-importance-of-{loop}s-in-coding",
+                });
+            }
+            await _dbContext.SaveChangesAsync();
         }
 
         private async Task SeedRolesAsync()

@@ -101,19 +101,29 @@
                     @*If this is MY comment AND it has not been moderated*@
                     @if (comment.AuthorId == _userManager.GetUserId(User) && comment.Moderated is null)
                     {
-                        <button class="btn btn-sm btn-dark float-end btnEdit" data-bs-toggle="modal" data-bs-target="#ModalEdit" data-target-id="@comment.Id">EDIT</button>
+                        <button class="btn btn-sm btn-dark btn-outline-dark text-white float-end ms-2 btnMod" data-bs-toggle="modal" data-bs-target="#ModalEdit" data-target-id="@comment.Id">EDIT</button>
                     }
 
                     @if (User.IsInRole("Moderator"))
                     {
                         if (comment.Moderated is null)
                         {
-                            <button class="btn btn-sm btn-danger btn-outline-dark float-end ms-2 btnMod" data-bs-toggle="modal" data-bs-target="#ModalModerate" data-target-id="@comment.Id">MODERATE</button>
+                            <button class="btn btn-sm btn-warning btn-outline-dark float-end ms-2 btnMod" data-bs-toggle="modal" data-bs-target="#ModalModerate" data-target-id="@comment.Id">MODERATE</button>
                         }
                         else
                         {
-                            <button class="btn btn-sm btn-danger btn-outline-dark float-end ms-2 btnMod" data-bs-toggle="modal" data-bs-target="#ModalModerate" data-target-id="@comment.Id" data-mod-reason="@comment.ModReason!.Value">MODERATE</button>
+                            <button class="btn btn-sm btn-warning btn-outline-dark float-end ms-2 btnMod" data-bs-toggle="modal" data-bs-target="#ModalModerate" data-target-id="@comment.Id" data-mod-reason="@comment.ModReason!.Value">MODERATE</button>
                         }
+                    }
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <button class="btn btn-sm btn-warning btn-outline-dark float-end ms-2 btnMod" data-bs-toggle="modal" data-bs-target="#ModalModerate" data-target-id="@comment.Id">MODERATE</button>
+                        <form asp-action="SoftDelete" asp-controller="BlogPostComments">
+                            <input type="hidden" name="Slug" value="@Model.Slug">
+                            <input type="hidden" name="Id" value="@comment.Id">
+                            <button type="submit" class="btn btn-sm btn-danger btn-outline-dark float-end ms-2 btnMod">DELETE</button>
+                        </form>
                     }
 
                 </div>
@@ -131,7 +141,7 @@
 @*Stack up all my modals here...*@
 
 <!-- Modal -->
-<div class="modal fade" id="ModalEdit" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="ModalEdit" tabindex="-1" aria-labelledby="ModalEditLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -169,7 +179,7 @@
 // Moderator name
 // The Moderated comment*@
 
-<div class="modal fade" id="ModalModerate" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="ModalModerate" tabindex="-1" aria-labelledby="ModalModerateLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">

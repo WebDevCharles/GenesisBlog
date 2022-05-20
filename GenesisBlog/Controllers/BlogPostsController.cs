@@ -2,6 +2,7 @@
 using GenesisBlog.Data;
 using GenesisBlog.Enums;
 using GenesisBlog.Models;
+using GenesisBlog.Services;
 using GenesisBlog.Services.Interfaces;
 using GenesisBlog.Utilities;
 using Microsoft.AspNetCore.Authorization;
@@ -17,11 +18,13 @@ namespace GenesisBlog.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IImageService _imageService;
+        private readonly SearchService _searchService;
 
-        public BlogPostsController(ApplicationDbContext context, IImageService imageService)
+        public BlogPostsController(ApplicationDbContext context, IImageService imageService, SearchService searchService)
         {
             _context = context;
             _imageService = imageService;
+            _searchService = searchService;
         }
 
         // GET: BlogPosts
@@ -77,6 +80,15 @@ namespace GenesisBlog.Controllers
 
         //    return View(blogPost);
         //}
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SearchPosts(string searchString)
+        {
+            var searchHits = _searchService.Search(searchString);
+            return View(searchHits);
+        }
+
 
         public async Task<IActionResult> Details(string slug)
         {
@@ -88,7 +100,7 @@ namespace GenesisBlog.Controllers
 
             var blogPost = await _context.BlogPosts
                 .Include(b => b.Tags)
-                .Include(b => b.BlogPostComments)
+                .Include(b => b.BlogPostComments.Where(b => !b.IsDeleted))
                 .ThenInclude(c => c.Author)
                 .FirstOrDefaultAsync(m => m.Slug == slug);
 

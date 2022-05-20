@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GenesisBlog.Controllers
 {
+    [Authorize(Roles = "Admin,Moderator")]
     public class BlogPostCommentsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -47,6 +48,7 @@ namespace GenesisBlog.Controllers
         }
 
         // GET: BlogPostComments/Create
+        [Authorize]
         public IActionResult Create()
         {
             ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Abstract");
@@ -56,6 +58,7 @@ namespace GenesisBlog.Controllers
         // POST: BlogPostComments/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BlogPostId,Comment")] BlogPostComment blogPostComment)
@@ -75,22 +78,23 @@ namespace GenesisBlog.Controllers
             return View(blogPostComment);
         }
 
-        // GET: BlogPostComments/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        //// GET: BlogPostComments/Edit/5
+        //[Authorize]
+        //public async Task<IActionResult> Edit(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var blogPostComment = await _context.BlogPostComment.FindAsync(id);
-            if (blogPostComment == null)
-            {
-                return NotFound();
-            }
-            ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Abstract", blogPostComment.BlogPostId);
-            return View(blogPostComment);
-        }
+        //    var blogPostComment = await _context.BlogPostComment.FindAsync(id);
+        //    if (blogPostComment == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Abstract", blogPostComment.BlogPostId);
+        //    return View(blogPostComment);
+        //}
 
         // POST: BlogPostComments/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -131,6 +135,7 @@ namespace GenesisBlog.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+
         public async Task<IActionResult> Moderate(int id, [Bind("Id,ModReason,ModeratedComment")] BlogPostComment blogPostComment)
         {
             if (id != blogPostComment.Id)
@@ -166,8 +171,7 @@ namespace GenesisBlog.Controllers
         }
 
         // GET: BlogPostComments/Delete/5
-        [Authorize(Roles = "Moderator")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Moderator")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -186,15 +190,29 @@ namespace GenesisBlog.Controllers
             return View(blogPostComment);
         }
 
+
         // POST: BlogPostComments/Delete/5
+        [Authorize(Roles = "Admin,Moderator")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var blogPostComment = await _context.BlogPostComment.FindAsync(id);
-            _context.BlogPostComment.Remove(blogPostComment);
+            var comment = await _context.BlogPostComment.FindAsync(id);
+            _context.BlogPostComment.Remove(comment);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = "Admin,Moderator")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SoftDelete(int id, string slug)
+        {
+            var comment = await _context.BlogPostComment.FindAsync(id);
+            comment.IsDeleted = true;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", "BlogPosts", new { slug }, "ScrollTo");
         }
 
         private bool BlogPostCommentExists(int id)

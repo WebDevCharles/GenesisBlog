@@ -33,6 +33,7 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddTransient<DataService>();
 builder.Services.AddScoped<DisplayService>();
 builder.Services.AddScoped<IEmailSender, BasicEmailService>();
+builder.Services.AddScoped<SearchService>();
 
 var app = builder.Build();
 

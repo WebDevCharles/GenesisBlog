@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text;
+using GenesisBlog.Enums;
+using X.PagedList;
 
 namespace GenesisBlog.Controllers
 {
@@ -22,10 +24,23 @@ namespace GenesisBlog.Controllers
             _appSettings = appSettings;
         }
 
-        public IActionResult Index()
+        //public IActionResult Index()
+        //{
+        //    var blogPosts = _context.BlogPosts.ToList();
+        //    return View(blogPosts);
+        //}
+
+        public async Task<IActionResult> Index(int? pageNum)
         {
-            var blogPosts = _context.BlogPosts.ToList();
-            return View(blogPosts);
+            pageNum ??= 1;
+            var pageSize = 4;
+
+            var posts = await _context.BlogPosts
+                        .Where(b => b.BlogPostState == BlogPostState.ProductionReady && !b.IsDeleted)
+                        .OrderByDescending(b => b.Created)
+                        .ToPagedListAsync(pageNum, pageSize);
+
+            return View(posts);
         }
 
         public IActionResult ContactMe()

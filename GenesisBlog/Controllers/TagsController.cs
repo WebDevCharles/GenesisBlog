@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace GenesisBlog.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class TagsController : Controller
     {
         private readonly ApplicationDbContext _context;
