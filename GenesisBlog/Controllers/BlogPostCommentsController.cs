@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GenesisBlog.Controllers
 {
-    [Authorize(Roles = "Admin,Moderator")]
+    [Authorize]
     public class BlogPostCommentsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -22,6 +22,7 @@ namespace GenesisBlog.Controllers
         }
 
         // GET: BlogPostComments
+        [Authorize(Roles = "Admin, Moderator")]
         public async Task<IActionResult> Index()
         {
             var applicationDbContext = _context.BlogPostComment.Include(b => b.BlogPost);
@@ -48,7 +49,6 @@ namespace GenesisBlog.Controllers
         }
 
         // GET: BlogPostComments/Create
-        [Authorize]
         public IActionResult Create()
         {
             ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Abstract");
@@ -58,7 +58,6 @@ namespace GenesisBlog.Controllers
         // POST: BlogPostComments/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BlogPostId,Comment")] BlogPostComment blogPostComment)
@@ -79,7 +78,6 @@ namespace GenesisBlog.Controllers
         }
 
         //// GET: BlogPostComments/Edit/5
-        [Authorize]
         public async Task<IActionResult> Edit(string slug)
         {
             if (slug == null)

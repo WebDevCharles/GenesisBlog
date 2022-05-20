@@ -28,6 +28,7 @@ namespace GenesisBlog.Controllers
         }
 
         // GET: BlogPosts
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
             //var posts = await _context.BlogPost.ToListAsync();
@@ -38,7 +39,6 @@ namespace GenesisBlog.Controllers
             return View(posts);
         }
 
-        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> PostsByTag(int id)
         {
@@ -92,7 +92,7 @@ namespace GenesisBlog.Controllers
 
         //    return View(blogPost);
         //}
-        [AllowAnonymous]
+ 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult SearchPosts(string searchString)
