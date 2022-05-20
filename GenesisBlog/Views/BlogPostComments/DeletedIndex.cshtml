@@ -3,19 +3,11 @@
 @inject SignInManager<BlogUser> SignInManager
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Deleted Index";
 }
 
 <div class="container">
-    <h1>Blog Comments:</h1>
-
-    @*<h4>Blog Post Comment(s):</h4>
-    <p>
-        @if (SignInManager.IsSignedIn(User))
-        {
-            <a asp-action="Create">Create New</a>
-        }
-    </p>*@
+    <h1>Deleted Comments</h1>
     <table class="table">
         <thead>
             <tr>
@@ -39,7 +31,6 @@
                         @Html.DisplayFor(modelItem => item.BlogPost.Abstract)
                     </td>
                     <td>
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                         <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                     </td>
                 </tr>

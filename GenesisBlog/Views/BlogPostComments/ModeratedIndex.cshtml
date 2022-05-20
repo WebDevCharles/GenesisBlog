@@ -3,19 +3,11 @@
 @inject SignInManager<BlogUser> SignInManager
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Moderated Index";
 }
 
 <div class="container">
-    <h1>Blog Comments:</h1>
-
-    @*<h4>Blog Post Comment(s):</h4>
-    <p>
-        @if (SignInManager.IsSignedIn(User))
-        {
-            <a asp-action="Create">Create New</a>
-        }
-    </p>*@
+    <h1>Moderated Comments</h1>
     <table class="table">
         <thead>
             <tr>

@@ -29,6 +29,24 @@ namespace GenesisBlog.Controllers
             return View(await applicationDbContext.ToListAsync());
         }
 
+        public async Task<IActionResult> ModeratedIndex()
+        {
+            var comments = await _context.BlogPostComment
+                                .Where(b => b.Moderated != null && !b.IsDeleted)
+                                .ToListAsync();
+
+            return View("ModeratedIndex", comments);
+        }
+
+        public async Task<IActionResult> DeletedIndex()
+        {
+            var comments = await _context.BlogPostComment
+                                .Where(b => b.IsDeleted)
+                                .ToListAsync();
+
+            return View("DeletedIndex", comments);
+        }
+
         // GET: BlogPostComments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -131,8 +149,8 @@ namespace GenesisBlog.Controllers
 
                 }
             }
-                ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Abstract", blogPostComment.BlogPostId);
-                return View(blogPostComment);
+            ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Abstract", blogPostComment.BlogPostId);
+            return View(blogPostComment);
         }
 
         [HttpPost]
