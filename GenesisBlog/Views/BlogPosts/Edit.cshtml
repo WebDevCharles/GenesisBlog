@@ -14,7 +14,7 @@
     <hr />
     <div class="row">
         <div class="col-md-12">
-            <form asp-action="Edit" enctype="multipart/form-data">
+            <form asp-action="Edit" id="formHaha" enctype="multipart/form-data">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="Id" />
                 <input type="hidden" asp-for="Created" />
@@ -80,4 +80,5 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    
     }

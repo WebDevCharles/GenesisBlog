@@ -79,58 +79,62 @@ namespace GenesisBlog.Controllers
         }
 
         //// GET: BlogPostComments/Edit/5
-        //[Authorize]
-        //public async Task<IActionResult> Edit(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
+        [Authorize]
+        public async Task<IActionResult> Edit(string slug)
+        {
+            if (slug == null)
+            {
+                return NotFound();
+            }
 
-        //    var blogPostComment = await _context.BlogPostComment.FindAsync(id);
-        //    if (blogPostComment == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Abstract", blogPostComment.BlogPostId);
-        //    return View(blogPostComment);
-        //}
+            var blogPostComment = await _context.BlogPostComment.FindAsync(slug);
+            if (blogPostComment == null)
+            {
+                return NotFound();
+            }
+            ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Abstract", blogPostComment.BlogPostId);
+            return View(blogPostComment);
+        }
 
         // POST: BlogPostComments/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,BlogPostId,Comment")] BlogPostComment blogPostComment)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,BlogPostId,Comment")] BlogPostComment blogPostComment, string slug)
         {
             if (id != blogPostComment.Id)
             {
                 return NotFound();
             }
 
-            try
+            if (ModelState.IsValid)
             {
-                var existingComment = await _context.BlogPostComment.FindAsync(blogPostComment.Id);
-                existingComment.Comment = blogPostComment.Comment;
-                existingComment.Updated = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
 
-                var blogPost = await _context.BlogPosts.FirstOrDefaultAsync(b => b.Id == existingComment.BlogPostId);
-
-                return RedirectToAction("Details", "BlogPosts", new { slug = blogPost!.Slug }, "ScrollTo");
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BlogPostCommentExists(blogPostComment.Id))
+                try
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                    var existingComment = await _context.BlogPostComment.FindAsync(blogPostComment.Id);
+                    existingComment.Comment = blogPostComment.Comment;
+                    existingComment.Updated = DateTime.UtcNow;
 
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Details", "BlogPosts", new { slug }, "ScrollTo");
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!BlogPostCommentExists(blogPostComment.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+
+                }
             }
+                ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Abstract", blogPostComment.BlogPostId);
+                return View(blogPostComment);
         }
 
         [HttpPost]

@@ -16,18 +16,22 @@
 }
 
 <!-- Post Content-->
-<article class="mb-4">
+<article class="mb-4 text-center justify-content-center">
     <div class="container px-4 px-lg-5">
         <div class="row gx-4 gx-lg-5 justify-content-center">
             <div class="col-md-10 col-lg-8 col-xl-7">
                 @Html.Raw(Model.Content)
             </div>
         </div>
-        <div class="row row-cols-1 row-cols-md-4 g-4 text-center">
+        <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
             @foreach (var tag in Model.Tags)
             {
                 <div class="col">
-                    <a class="btn btn-warning btn-outline-dark w-100">@tag.Text</a>
+                    <a class="btn btn-warning btn-outline-dark w-100" 
+                        asp-action="PostsByTag" 
+                        asp-route-id="@tag.Id">
+                        @tag.Text
+                    </a>
                 </div>
             }
         </div>
@@ -39,6 +43,7 @@
     {
         <form asp-controller="BlogPostComments" asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" name="Slug" value="@Model.Slug">
             <input type="hidden" name="BlogPostId" value="@Model.Id">
 
             <div class="form-group mb-2">
@@ -54,7 +59,12 @@
     {
         <div class="row">
             <div class="col">
-                <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-warning btn-outline-dark w-100">Login to add a comment</a>
+                <a asp-area="Identity" 
+                     asp-page="/Account/Login"
+                     asp-route-returnUrl="@Url.Action("Details", "BlogPosts", new { slug = Model.Slug })"
+                     class="btn btn-warning btn-outline-dark w-100" >
+                        Login to add a comment
+                </a>
             </div>
         </div>
     }
@@ -101,7 +111,7 @@
                     @*If this is MY comment AND it has not been moderated*@
                     @if (comment.AuthorId == _userManager.GetUserId(User) && comment.Moderated is null)
                     {
-                        <button class="btn btn-sm btn-dark btn-outline-dark text-white float-end ms-2 btnMod" data-bs-toggle="modal" data-bs-target="#ModalEdit" data-target-id="@comment.Id">EDIT</button>
+                        <button class="btn btn-sm btn-dark btn-outline-dark text-white float-end ms-2 btnEdit" data-bs-toggle="modal" data-bs-target="#ModalEdit" data-target-id="@comment.Id">EDIT</button>
                     }
 
                     @if (User.IsInRole("Moderator"))
@@ -141,7 +151,7 @@
 @*Stack up all my modals here...*@
 
 <!-- Modal -->
-<div class="modal fade" id="ModalEdit" tabindex="-1" aria-labelledby="ModalEditLabel" aria-hidden="true">
+<div class="modal fade" id="ModalEdit" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -149,10 +159,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="frmEdit" asp-controller="BlogPostComments" asp-action="Edit">
+
+                <form id="frmEdit" asp-controller="BlogPostComments" asp-action="Edit">                  
                     <input type="hidden" name="Id" id="ModalId" />
+                    <input type="hidden" name="Slug" value="@Model!.Slug" />
                     <div class="form-group mb-3">
-                        <label class="control-label">Comment:</label>
+                        <label class="control-label">Comment</label>
                         <textarea name="Comment" id="ModalComment" class="form-control" rows=5></textarea>
                     </div>
                 </form>

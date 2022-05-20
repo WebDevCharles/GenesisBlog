@@ -38,6 +38,18 @@ namespace GenesisBlog.Controllers
             return View(posts);
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> PostsByTag(int id)
+        {
+            //var tag = await _context.Tag.FindAsync(id);
+            var tag = await _context.Tag
+                            .Include(t => t.BlogPosts)
+                            .FirstOrDefaultAsync(t => t.Id == id);
+
+            return View("SearchPosts", tag.BlogPosts.ToList());
+        }
+
         public async Task<IActionResult> InDevIndex()
         {
             var posts = await _context.BlogPosts
