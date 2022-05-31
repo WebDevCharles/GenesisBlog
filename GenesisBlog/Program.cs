@@ -53,7 +53,18 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Configure a CORS policy
+builder.Services.AddCors(obj => 
+{
+    obj.AddPolicy("Default Policy",
+        builder => builder.AllowAnyOrigin()
+                                    .AllowAnyMethod()
+                                    .AllowAnyHeader());
+});
+
 var app = builder.Build();
+
+app.UseCors("Default Policy");
 
 var scope = app.Services.CreateScope();
 var dataService = scope.ServiceProvider.GetRequiredService<DataService>();
