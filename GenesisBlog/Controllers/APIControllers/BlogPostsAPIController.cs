@@ -17,7 +17,8 @@ namespace GenesisBlog.Controllers.APIControllers
             _context = context;
         }
 
-        [HttpGet("/GetTopXPosts/{num}")]
+        [HttpGet]
+        [ActionName ("GetTopXPosts/{num}")]
         public async Task<ActionResult<IEnumerable<BlogPost>>> GetTopXPosts(int num)
         {
             if (_context.BlogPosts == null)

@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-GenesisBlog-F1503F27-0F40-4C5E-8AF6-0DA8DCBDACC5</UserSecretsId>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <DocumentationFile></DocumentationFile>
+    <DocumentationFile>C:\Users\produ\source\repos\GenesisBlog\GenesisBlog\wwwroot\GenesisBlog.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +28,12 @@
 
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\GenesisBlog.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
