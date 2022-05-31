@@ -4,19 +4,35 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GenesisBlog.Models
 {
+
+    /// <summary>
+    ///     This Class processes the requests for Blog Posts.
+    /// </summary>
     [Display(Name = "Blog Post")]
     public class BlogPost
     {
+        /// <summary>
+        ///     This is the PK of a Blog Post record.
+        /// </summary>
         public int Id { get; set; } // This turns into an auto-incrementing integer
 
+        /// <summary>
+        ///     This serves as the Blog Post Title.
+        /// </summary>
         [Required]
         [StringLength(150, ErrorMessage = "The {0} must be at least {2} and at most {1} characters long.", MinimumLength = 5)]
         public string Title { get; set; } = "";
 
+        /// <summary>
+        ///     This is a synopsis of the Blog Post to entice the reader.
+        /// </summary>
         [Required]
         [StringLength(150, ErrorMessage = "The {0} must be at least {2} and at most {1} characters long.", MinimumLength = 5)]
         public string Abstract { get; set; } = "";
 
+        /// <summary>
+        ///     This is the the actual Blog Post.
+        /// </summary>
         [Required]
         public string Content { get; set; } = "";
 

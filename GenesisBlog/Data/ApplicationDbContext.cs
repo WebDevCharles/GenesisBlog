@@ -13,9 +13,9 @@ namespace GenesisBlog.Data
 
         public DbSet<BlogPost> BlogPosts { get; set; }
 
-        public DbSet<GenesisBlog.Models.BlogPostComment> BlogPostComment { get; set; }
+        public DbSet<BlogPostComment> BlogPostComment { get; set; }
 
-        public DbSet<GenesisBlog.Models.Tag> Tag { get; set; }
+        public DbSet<Tag> Tag { get; set; }
 
     }
 }
