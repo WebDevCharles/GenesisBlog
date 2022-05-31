@@ -38,7 +38,8 @@ builder.Services.AddScoped<SearchService>();
 // Register an instance of SwaggerGen
 builder.Services.AddSwaggerGen(c =>
 {
-    c.IncludeXmlComments($"{Directory.GetCurrentDirectory()}/obj/Debug/net6.0/GenesisBlog.xml", true);
+    c.IncludeXmlComments($"{Directory.GetCurrentDirectory()}/bin/Debug/net6.0/GenesisBlog.xml", true);
+    //c.IncludeXmlComments($"{Directory.GetCurrentDirectory()}/GenesisBlog.xml");
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "Genesis Blog API",
