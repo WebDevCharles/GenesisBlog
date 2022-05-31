@@ -38,8 +38,8 @@ builder.Services.AddScoped<SearchService>();
 // Register an instance of SwaggerGen
 builder.Services.AddSwaggerGen(c =>
 {
-    c.IncludeXmlComments($"{Directory.GetCurrentDirectory()}/bin/Debug/net6.0/GenesisBlog.xml", true);
-    //c.IncludeXmlComments($"{Directory.GetCurrentDirectory()}/GenesisBlog.xml");
+    c.IncludeXmlComments($"{Directory.GetCurrentDirectory()}/obj/Debug/net6.0/GenesisBlog.xml", true);
+    //c.IncludeXmlComments($"{Directory.GetCurrentDirectory()}/wwwroot/GenesisBlog.xml, true");
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "Genesis Blog API",
@@ -56,15 +56,6 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Public API");
-    c.InjectStylesheet("/css/swagger.css");
-    c.InjectJavascript("/js/swagger.js");
-    c.DocumentTitle = "Genesis Blog Public API";
-});
-
 var scope = app.Services.CreateScope();
 var dataService = scope.ServiceProvider.GetRequiredService<DataService>();
 await dataService.SetupDBAsync();
@@ -80,6 +71,15 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Public API");
+    c.InjectStylesheet("/css/swagger.css");
+    c.InjectJavascript("/js/swagger.js");
+    c.DocumentTitle = "Genesis Blog Public API";
+});
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
