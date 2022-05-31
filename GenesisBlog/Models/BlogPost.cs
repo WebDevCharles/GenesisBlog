@@ -27,7 +27,7 @@ namespace GenesisBlog.Models
         ///     This is a synopsis of the Blog Post to entice the reader.
         /// </summary>
         [Required]
-        [StringLength(150, ErrorMessage = "The {0} must be at least {2} and at most {1} characters long.", MinimumLength = 5)]
+        [StringLength(500, ErrorMessage = "The {0} must be at least {2} and at most {1} characters long.", MinimumLength = 5)]
         public string Abstract { get; set; } = "";
 
         /// <summary>
