@@ -212,7 +212,7 @@ namespace GenesisBlog.Controllers
 
 
         // POST: BlogPostComments/Delete/5
-        [Authorize(Roles = "Admin,Moderator")]
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
