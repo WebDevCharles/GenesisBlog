@@ -100,7 +100,7 @@
     </header>*@
 
     @{
-        var bgImage = "/img/CodeHeading.jpg";
+        var bgImage = "/images/Blog_Cover.jpg";
         if (ViewBag.ImageType is not null)
             bgImage = _imageService.ConvertByteArrayToFile(ViewBag.ImageData, ViewBag.ImageType);
     }
